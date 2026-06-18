@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Project page for VeriEvol: Scaling Multimodal Mathematical Reasoning via Verifiable Evol-Instruct.">
+  <meta name="keywords" content="VeriEvol, multimodal mathematical reasoning, visual math, reinforcement learning, evol-instruct, HTV-Agent">
+  <title>VeriEvol: Scaling Multimodal Mathematical Reasoning via Verifiable Evol-Instruct</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="static/css/site.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2371097d'/%3E%3Cpath d='M14 16h9l9 29 9-29h9L38 50H26L14 16z' fill='white'/%3E%3C/svg%3E">
+</head>
+<body>
+  <nav class="top-nav" aria-label="Main navigation">
+    <a class="nav-brand" href="#top" aria-label="VeriEvol home">
+      <span class="brand-mark">V</span>
+      <span>VeriEvol</span>
+    </a>
+    <div class="nav-links">
+      <a href="#introduction">Introduction</a>
+      <a href="#method">Method</a>
+      <a href="#experiments">Experiments</a>
+      <a href="#release">Release</a>
+      <a href="#citation">Citation</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <header class="hero">
+      <div class="container hero-inner">
+        <h1 class="publication-title">
+          <span>VeriEvol:</span> Scaling Multimodal Mathematical Reasoning via Verifiable Evol-Instruct
+        </h1>
+
+        <div class="publication-authors">
+          <span>Haoling Li<sup>1,2,&ast;</sup></span>
+          <span>Kai Zheng<sup>2,&ast;,&dagger;</sup></span>
+          <span>Jie Wu<sup>1</sup></span>
+          <span>Can Xu<sup>2,&dagger;</sup></span>
+          <span>Qingfeng Sun<sup>2</sup></span>
+          <span>Han Hu<sup>2</sup></span>
+          <span>Yujiu Yang<sup>1,&dagger;</sup></span>
+        </div>
+
+        <div class="affiliations">
+          <span><sup>1</sup>Tsinghua University</span>
+          <span><sup>2</sup>Tencent Hunyuan</span>
+        </div>
+        <p class="correspondence"><sup>&ast;</sup>Equal contribution. <sup>&dagger;</sup>Corresponding authors.</p>
+
+        <div class="publication-links" aria-label="Publication links">
+          <a class="paper-button" href="static/verievol-paper.pdf" target="_blank" rel="noopener">
+            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+            <span>Paper</span>
+          </a>
+          <a class="paper-button" href="https://github.com/RobertMarton/verievol" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github" aria-hidden="true"></i>
+            <span>GitHub</span>
+          </a>
+          <a class="paper-button" href="#release">
+            <i class="fa-solid fa-database" aria-hidden="true"></i>
+            <span>Data &amp; Models</span>
+          </a>
+          <a class="paper-button" href="#citation">
+            <i class="fa-solid fa-quote-right" aria-hidden="true"></i>
+            <span>BibTeX</span>
+          </a>
+        </div>
+
+        <figure class="teaser-card">
+          <img src="static/images/teaser-results.png" alt="External comparison and data-volume scaling plots for VeriEvol.">
+          <figcaption>
+            VeriEvol leads the strongest full-coverage 7B baselines on DynaMath-Worst and We-Math-Strict, while evolved SFT data and verified RL data both scale upward with data volume.
+          </figcaption>
+        </figure>
+      </div>
+    </header>
+
+    <section class="section section-muted" id="introduction">
+      <div class="container">
+        <div class="section-heading">
+          <h2>Introduction</h2>
+          <p>VeriEvol asks a simple scaling question: what if harder multimodal math prompts are not enough unless their answers are also verifiably reliable?</p>
+        </div>
+
+        <div class="intro-grid">
+          <article>
+            <h3>Why Verification Matters</h3>
+            <p>
+              In visual mathematical reasoning, wrong answers become especially damaging at the RL stage: every rollout can repeatedly convert a noisy label into reward signal. VeriEvol moves answer reliability into the data-construction stage, before any policy update.
+            </p>
+          </article>
+          <article>
+            <h3>Two Independent Axes</h3>
+            <p>
+              Prompt difficulty scales through route-specific evolution operators, while answer reliability scales through offline hypothesis-test falsification. This decoupling makes each part extensible and auditable.
+            </p>
+          </article>
+          <article>
+            <h3>RL-Compatible Outputs</h3>
+            <p>
+              Accepted examples are materialized as standard prompt-answer-reward tuples, so the resulting VeriEvol-RL data can plug into existing GRPO-style recipes without changing the optimizer.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <div class="section-heading">
+          <h2>Method</h2>
+          <p>The framework turns low-difficulty image-question seeds into verified training samples through prompt difficulty control, answer reliability control, and closed-loop refinement.</p>
+        </div>
+
+        <figure class="figure-card">
+          <img src="static/images/framework.png" alt="VeriEvol framework diagram showing prompt difficulty control, answer reliability control, and closed-loop refinement.">
+          <figcaption>
+            Type-aware evolution generates harder image-grounded prompts. HTV-Agent verifies candidate answers through solver hypotheses, refutation channels, a conflict-aware decider, and a deterministic gate. Accepted samples are reused for SFT, RL, curriculum prioritization, and seed refresh.
+          </figcaption>
+        </figure>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-icon"><i class="fa-solid fa-route" aria-hidden="true"></i></span>
+            <h3>Prompt Difficulty Control</h3>
+            <p>Task routing sends seeds to route-specific operators such as decomposition, rephrasing, constraint strengthening, multi-hop reasoning, inverse solving, and visual grounding.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+            <h3>Answer Reliability Control</h3>
+            <p>HTV-Agent accepts an answer only after multiple solver hypotheses and counter-evidence channels fail to refute it.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon"><i class="fa-solid fa-rotate" aria-hidden="true"></i></span>
+            <h3>Closed-Loop Refinement</h3>
+            <p>Rollout-based difficulty estimates prioritize useful samples and refresh the seed pool, keeping the construction loop focused on learnable challenges.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-muted" id="verification">
+      <div class="container">
+        <div class="section-heading">
+          <h2>Scaling And Verification</h2>
+          <p>VeriEvol combines data-volume scaling with explicit verification, then validates the effect through training dynamics and verifier ablations.</p>
+        </div>
+
+        <div class="paired-figures">
+          <figure class="figure-card compact">
+            <div class="figure-media">
+              <img src="static/images/training-dynamics.png" alt="GRPO reward and policy entropy curves for original versus evolved training data.">
+            </div>
+            <figcaption>Evolved prompts reach a higher terminal GRPO reward while sustaining higher policy entropy during training.</figcaption>
+          </figure>
+          <figure class="figure-card compact">
+            <div class="figure-media">
+              <img src="static/images/htv-ablation.png" alt="HTV-Agent component ablation bar charts.">
+            </div>
+            <figcaption>HTV-Agent improves raw single-call accuracy with complementary gains from self-consistency voting and programmatic checks.</figcaption>
+          </figure>
+        </div>
+
+        <div class="stat-grid">
+          <article><strong>10K &rarr; 250K</strong><span>Evolved SFT data raises average accuracy from 35.42 to 54.73.</span></article>
+          <article><strong>10K &rarr; 130K</strong><span>Verified RL data scales from 54.52 to 59.12 average accuracy.</span></article>
+          <article><strong>+3.88</strong><span>Full VeriEvol gain over the un-evolved RL baseline.</span></article>
+          <article><strong>+4.51pp</strong><span>Full HTV-Agent gain over raw single-call judging in the ablation.</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="experiments">
+      <div class="container">
+        <div class="section-heading">
+          <h2>Experiments</h2>
+          <p>All internal rows share the Qwen2.5-VL-7B-Instruct backbone and evaluate on five held-out visual mathematical reasoning benchmarks.</p>
+        </div>
+
+        <div class="table-wrap" role="region" aria-label="Main results table" tabindex="0">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>MathVista<br><span>Mini &uarr;</span></th>
+                <th>MathVision<br><span>Mini &uarr;</span></th>
+                <th>MathVerse<br><span>VO &uarr;</span></th>
+                <th>DynaMath<br><span>Worst &uarr;</span></th>
+                <th>We-Math<br><span>Strict &uarr;</span></th>
+                <th>Avg. &uarr;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="panel-row"><td colspan="7">External 7B-size baselines</td></tr>
+              <tr><td>OpenMMReasoner-7B</td><td class="best">79.50</td><td>43.60</td><td>63.80</td><td>34.90</td><td>53.81</td><td>55.12</td></tr>
+              <tr><td>ReVisual-R1-7B</td><td>73.10</td><td class="best">48.80</td><td>53.60</td><td>27.50</td><td>42.00</td><td>49.00</td></tr>
+              <tr><td>OVR-7B</td><td>72.10</td><td>38.20</td><td>54.60</td><td>33.50</td><td>44.60</td><td>48.60</td></tr>
+              <tr><td>MMR1-Math-v0</td><td>72.00</td><td>29.00</td><td>55.40</td><td>27.90</td><td>31.90</td><td>43.24</td></tr>
+              <tr><td>WeThink-7B</td><td>70.90</td><td>27.20</td><td>44.70</td><td>24.40</td><td>48.00</td><td>43.04</td></tr>
+              <tr><td>VLAA-Thinker-7B</td><td>68.00</td><td>26.40</td><td>48.20</td><td>22.40</td><td>41.50</td><td>41.30</td></tr>
+              <tr><td>VL-Rethinker-7B</td><td>73.70</td><td>28.40</td><td>46.40</td><td>17.80</td><td>36.30</td><td>40.52</td></tr>
+              <tr><td>ThinkLite-VL-7B</td><td>71.60</td><td>24.60</td><td>42.90</td><td>16.50</td><td>41.80</td><td>39.48</td></tr>
+              <tr><td>MM-Eureka-Qwen-7B</td><td>72.60</td><td>32.10</td><td>45.40</td><td>23.00</td><td>21.80</td><td>38.98</td></tr>
+              <tr><td>InternVL3-8B</td><td>70.50</td><td>28.60</td><td>33.90</td><td>23.00</td><td>37.50</td><td>38.70</td></tr>
+              <tr><td>Qwen2.5-VL-7B-Instruct</td><td>69.20</td><td>21.80</td><td>34.10</td><td>18.00</td><td>32.30</td><td>35.08</td></tr>
+
+              <tr class="panel-row"><td colspan="7">Supervised Fine-Tuning (ours)</td></tr>
+              <tr><td>Seed-only SFT</td><td>74.10</td><td>36.16</td><td>65.02</td><td>26.96</td><td>56.76</td><td>51.80</td></tr>
+              <tr class="ours-soft"><td>VeriEvol-SFT</td><td>76.60</td><td>39.80</td><td>67.01</td><td>30.94</td><td>59.33</td><td>54.73</td></tr>
+
+              <tr class="panel-row"><td colspan="7">Reinforcement Learning (ours)</td></tr>
+              <tr><td>RL-Origin</td><td>77.00</td><td>41.45</td><td>69.04</td><td>30.54</td><td>58.19</td><td>55.24</td></tr>
+              <tr><td>RL-Evol</td><td>78.10</td><td>45.39</td><td>69.67</td><td>32.14</td><td>60.00</td><td>57.06</td></tr>
+              <tr class="ours-strong"><td>RL-Evol + Verifier (full VeriEvol)</td><td>79.00</td><td>47.37</td><td class="best">70.46</td><td class="best">35.73</td><td class="best">63.05</td><td class="best">59.12</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Full VeriEvol adds +3.88 average points over RL-Origin, including +1.82 from evolved prompts and +2.06 from HTV-Agent verification.</p>
+      </div>
+    </section>
+
+    <section class="section section-muted" id="release">
+      <div class="container narrow">
+        <h2>Release</h2>
+        <p>
+          The paper describes the release of prompts, data, models, code, and the full verifier trace of every accepted sample. Public links were not included in the provided PDF, so this page keeps the paper live and reserves release slots for upcoming artifacts.
+        </p>
+        <div class="release-list">
+          <a href="static/verievol-paper.pdf" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i><span>Paper PDF</span></a>
+          <a href="https://github.com/RobertMarton/verievol" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub Repository</span></a>
+          <span><i class="fa-solid fa-database" aria-hidden="true"></i><span>Data and verifier traces pending URL</span></span>
+          <span><i class="fa-solid fa-cubes" aria-hidden="true"></i><span>Model checkpoints pending URL</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="citation">
+      <div class="container narrow">
+        <h2>Citation</h2>
+        <pre class="bibtex"><code>@article{li2026verievol,
+  title={VeriEvol: Scaling Multimodal Mathematical Reasoning via Verifiable Evol-Instruct},
+  author={Li, Haoling and Zheng, Kai and Wu, Jie and Xu, Can and Sun, Qingfeng and Hu, Han and Yang, Yujiu},
+  year={2026}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Page structure inspired by the SvS project page style, with VeriEvol paper figures and results.</p>
+    </div>
+  </footer>
+</body>
+</html>
